@@ -8,62 +8,9 @@
 </head>
 <body>
   <h1>Walkie Talkie</h1>
-  <button id="pttBtn">Hold to Talk</button>
+  <button id="pttButton">Hold to Talk</button>
 
-  <script type="module">
-    import AgoraRTC from "https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4.24.0/dist/AgoraRTC_N.js";
-
-    const pttBtn = document.getElementById("pttBtn");
-
-    let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-    let localAudioTrack;
-    let joined = false;
-
-    async function getToken() {
-      const res = await fetch("/api/generateToken");
-      const data = await res.json();
-      return data.token;
-    }
-
-    async function joinChannel() {
-      if (joined) return;
-
-      const token = await getToken();
-      const appId = "59595697a95d4d819dda18070b4f5ffe";
-      const channel = "walkiechannel";
-
-      await client.join(appId, channel, token, null);
-      localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      joined = true;
-      console.log("Joined channel successfully");
-    }
-
-    async function startTalking() {
-      if (!joined) await joinChannel();
-      if (localAudioTrack) await client.publish([localAudioTrack]);
-      console.log("Publishing audio...");
-    }
-
-    async function stopTalking() {
-      if (localAudioTrack) await client.unpublish([localAudioTrack]);
-      console.log("Stopped publishing audio");
-    }
-
-    // Hold-to-talk behavior
-    pttBtn.addEventListener("mousedown", startTalking);
-    pttBtn.addEventListener("touchstart", startTalking);
-
-    pttBtn.addEventListener("mouseup", stopTalking);
-    pttBtn.addEventListener("touchend", stopTalking);
-
-    // Handle leaving channel when user closes the page
-    window.addEventListener("beforeunload", async () => {
-      if (localAudioTrack) {
-        await client.unpublish([localAudioTrack]);
-        localAudioTrack.close();
-      }
-      await client.leave();
-    });
-  </script>
+  <script src="https://cdn.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
