@@ -1,25 +1,34 @@
-const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
+import { RtcTokenBuilder, RtcRole } from "agora-access-token";
 
 export default function handler(req, res) {
-  const appID = "59595697a95d4d819dda18070b4f5ffe"; // Your Agora App ID
-  const appCertificate = "66ed800ef2f54df9bee2ac87badf2210"; // Your Primary Certificate
+  const APP_ID = "59595697a95d4d819dda18070b4f5ffe";
+  const APP_CERTIFICATE = "66ed800ef2f54df9bee2ac87badf2210";
 
-  const channelName = req.query.channel || "default";
-  const uid = Math.floor(Math.random() * 100000);
+  // Single fixed channel name
+  const channelName = "walkiechannel";
+
+  // Anyone can be publisher (so they can speak)
   const role = RtcRole.PUBLISHER;
-  const expirationTimeInSeconds = 3600; // token valid for 1 hour
 
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+  // Expiry time in seconds (here: 1 hour)
+  const expireTime = 3600;
 
+  // UID 0 lets Agora assign automatically
+  const uid = 0;
+
+  // Generate the token
   const token = RtcTokenBuilder.buildTokenWithUid(
-    appID,
-    appCertificate,
+    APP_ID,
+    APP_CERTIFICATE,
     channelName,
     uid,
     role,
-    privilegeExpiredTs
+    expireTime
   );
 
-  res.status(200).json({ token, uid });
+  res.status(200).json({
+    appId: APP_ID,
+    channel: channelName,
+    token
+  });
 }
