@@ -1,65 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Walkie-Talkie</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agora Walkie-Talkie</title>
+  <link rel="stylesheet" href="style.css"/>
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
 </head>
 <body>
   <h1>Agora Walkie-Talkie</h1>
 
-  <input id="channel" placeholder="Channel Name" />
   <button id="joinBtn">Join Channel</button>
-  <button id="leaveBtn">Leave Channel</button>
-
-  <div class="ptt-container">
-    <button id="pttBtn">Hold to Talk</button>
-  </div>
+  <button id="leaveBtn" disabled>Leave Channel</button>
+  <button id="pttBtn" disabled>Hold to Talk</button>
 
   <script>
-    const APP_ID = "59595697a95d4d819dda18070b4f5ffe"; 
-    let client, localTrack;
+    const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    let localAudioTrack;
+    let joined = false;
+
+    async function fetchToken() {
+      const res = await fetch("/api/generateToken");
+      return await res.json();
+    }
 
     document.getElementById("joinBtn").onclick = async () => {
-      const channel = document.getElementById("channel").value || "default";
-      const res = await fetch(`/api/generateToken?channel=${channel}`);
-      const data = await res.json();
+      if (joined) return;
 
-      client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-      await client.join(APP_ID, channel, data.token, data.uid);
+      const { appId, channel, token } = await fetchToken();
+      await client.join(appId, channel, token, null);
 
-      localTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      await client.publish([localTrack]);
+      // Prepare local mic but don't publish yet
+      localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+
+      document.getElementById("joinBtn").disabled = true;
+      document.getElementById("leaveBtn").disabled = false;
+      document.getElementById("pttBtn").disabled = false;
+      joined = true;
 
       client.on("user-published", async (user, mediaType) => {
         await client.subscribe(user, mediaType);
-        if (mediaType === "audio") user.audioTrack.play();
+        if (mediaType === "audio") {
+          user.audioTrack.play();
+        }
       });
 
-      console.log("Joined:", channel);
+      client.on("user-unpublished", (user) => {
+        console.log("User left:", user.uid);
+      });
     };
 
     document.getElementById("leaveBtn").onclick = async () => {
-      if (localTrack) localTrack.close();
-      if (client) await client.leave();
-      console.log("Left channel");
+      if (!joined) return;
+
+      if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+      }
+
+      await client.leave();
+      document.getElementById("joinBtn").disabled = false;
+      document.getElementById("leaveBtn").disabled = true;
+      document.getElementById("pttBtn").disabled = true;
+      joined = false;
     };
 
+    // Push-to-Talk button
     const pttBtn = document.getElementById("pttBtn");
-    pttBtn.addEventListener("mousedown", async () => {
-      if (localTrack) await localTrack.setEnabled(true);
-    });
-    pttBtn.addEventListener("mouseup", async () => {
-      if (localTrack) await localTrack.setEnabled(false);
-    });
-    pttBtn.addEventListener("touchstart", async () => {
-      if (localTrack) await localTrack.setEnabled(true);
-    });
-    pttBtn.addEventListener("touchend", async () => {
-      if (localTrack) await localTrack.setEnabled(false);
-    });
+    pttBtn.onmousedown = async () => {
+      if (joined && localAudioTrack) {
+        await client.publish([localAudioTrack]);
+        console.log("🎙️ Mic ON");
+      }
+    };
+    pttBtn.onmouseup = async () => {
+      if (joined && localAudioTrack) {
+        await client.unpublish([localAudioTrack]);
+        console.log("🔇 Mic OFF");
+      }
+    };
   </script>
 </body>
 </html>
