@@ -4,19 +4,14 @@ export default function handler(req, res) {
   const APP_ID = "59595697a95d4d819dda18070b4f5ffe";
   const APP_CERTIFICATE = "66ed800ef2f54df9bee2ac87badf2210";
 
-  // Single fixed channel name
   const channelName = "walkiechannel";
-
-  // Anyone can be publisher (so they can speak)
   const role = RtcRole.PUBLISHER;
 
-  // Expiry time in seconds (here: 1 hour)
-  const expireTime = 3600;
+  // 24 hours in seconds
+  const expireTime = 24 * 3600;
 
-  // UID 0 lets Agora assign automatically
-  const uid = 0;
+  const uid = 0; // let Agora assign UID automatically
 
-  // Generate the token
   const token = RtcTokenBuilder.buildTokenWithUid(
     APP_ID,
     APP_CERTIFICATE,

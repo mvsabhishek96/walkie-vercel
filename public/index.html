@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agora Walkie-Talkie</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css">
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    h1 { margin-bottom: 30px; }
+    button { font-size: 1.2rem; padding: 15px 30px; margin: 10px; cursor: pointer; }
+    #pttBtn { background: red; color: white; border-radius: 50%; width: 120px; height: 120px; font-size: 1rem; }
+    #pttBtn.active { background: green; }
+  </style>
 </head>
 <body>
   <h1>Agora Walkie-Talkie</h1>
-
   <button id="joinBtn">Join Channel</button>
   <button id="leaveBtn" disabled>Leave Channel</button>
+  <br>
   <button id="pttBtn" disabled>Hold to Talk</button>
 
   <script>
@@ -26,28 +33,31 @@
 
     document.getElementById("joinBtn").onclick = async () => {
       if (joined) return;
-
       const { appId, channel, token } = await fetchToken();
-      await client.join(appId, channel, token, null);
 
-      // Prepare local mic but don't publish yet
-      localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      try {
+        await client.join(appId, channel, token, null);
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
-      document.getElementById("joinBtn").disabled = true;
-      document.getElementById("leaveBtn").disabled = false;
-      document.getElementById("pttBtn").disabled = false;
-      joined = true;
+        document.getElementById("joinBtn").disabled = true;
+        document.getElementById("leaveBtn").disabled = false;
+        document.getElementById("pttBtn").disabled = false;
+        joined = true;
 
-      client.on("user-published", async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        if (mediaType === "audio") {
-          user.audioTrack.play();
-        }
-      });
+        client.on("user-published", async (user, mediaType) => {
+          await client.subscribe(user, mediaType);
+          if (mediaType === "audio") {
+            user.audioTrack.play();
+          }
+        });
 
-      client.on("user-unpublished", (user) => {
-        console.log("User left:", user.uid);
-      });
+        client.on("user-unpublished", (user) => {
+          console.log("User left:", user.uid);
+        });
+
+      } catch (err) {
+        console.error("Join channel failed:", err);
+      }
     };
 
     document.getElementById("leaveBtn").onclick = async () => {
@@ -65,20 +75,44 @@
       joined = false;
     };
 
-    // Push-to-Talk button
     const pttBtn = document.getElementById("pttBtn");
-    pttBtn.onmousedown = async () => {
+
+    // Press and hold to talk
+    pttBtn.addEventListener("mousedown", async () => {
       if (joined && localAudioTrack) {
         await client.publish([localAudioTrack]);
-        console.log("🎙️ Mic ON");
+        pttBtn.classList.add("active");
+        pttBtn.innerText = "Talking...";
       }
-    };
-    pttBtn.onmouseup = async () => {
+    });
+
+    pttBtn.addEventListener("mouseup", async () => {
       if (joined && localAudioTrack) {
         await client.unpublish([localAudioTrack]);
-        console.log("🔇 Mic OFF");
+        pttBtn.classList.remove("active");
+        pttBtn.innerText = "Hold to Talk";
       }
-    };
+    });
+
+    // Support touch devices
+    pttBtn.addEventListener("touchstart", async (e) => {
+      e.preventDefault();
+      if (joined && localAudioTrack) {
+        await client.publish([localAudioTrack]);
+        pttBtn.classList.add("active");
+        pttBtn.innerText = "Talking...";
+      }
+    });
+
+    pttBtn.addEventListener("touchend", async (e) => {
+      e.preventDefault();
+      if (joined && localAudioTrack) {
+        await client.unpublish([localAudioTrack]);
+        pttBtn.classList.remove("active");
+        pttBtn.innerText = "Hold to Talk";
+      }
+    });
+
   </script>
 </body>
 </html>
