@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walkie-Talkie PWA</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.agora.io/sdk/web/AgoraRTC_N-4.17.0.js"></script>
+</head>
+<body>
+
+<h1>Walkie-Talkie</h1>
+
+<input id="channel" placeholder="Channel Name" />
+<button id="joinBtn">Join Channel</button>
+<button id="leaveBtn">Leave Channel</button>
+
+<div class="ptt-container">
+  <button id="pttBtn">Hold to Talk</button>
+</div>
+
+<script>
+const APP_ID = "YOUR_AGORA_APP_ID"; // Replace with your Agora App ID
+let client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+let localTrack;
+let isSpeaking = false;
+
+// Join channel
+document.getElementById("joinBtn").onclick = async () => {
+  const channel = document.getElementById("channel").value || "default";
+  await client.join(APP_ID, channel, null, null);
+
+  localTrack = await AgoraRTC.createMicrophoneAudioTrack();
+  await client.publish([localTrack]);
+
+  client.on("user-published", async (user, mediaType) => {
+    await client.subscribe(user, mediaType);
+    if (mediaType === "audio") user.audioTrack.play();
+  });
+
+  console.log("Joined channel:", channel);
+};
+
+// Leave channel
+document.getElementById("leaveBtn").onclick = async () => {
+  localTrack && localTrack.close();
+  await client.leave();
+  console.log("Left channel");
+};
+
+// Push-to-Talk button
+const pttBtn = document.getElementById("pttBtn");
+
+pttBtn.addEventListener("mousedown", async () => {
+  if (localTrack) {
+    await localTrack.setEnabled(true);
+    isSpeaking = true;
+  }
+});
+
+pttBtn.addEventListener("mouseup", async () => {
+  if (localTrack) {
+    await localTrack.setEnabled(false);
+    isSpeaking = false;
+  }
+});
+
+// For mobile touch
+pttBtn.addEventListener("touchstart", async () => {
+  if (localTrack) await localTrack.setEnabled(true);
+});
+
+pttBtn.addEventListener("touchend", async () => {
+  if (localTrack) await localTrack.setEnabled(false);
+});
+</script>
+
+</body>
+</html>

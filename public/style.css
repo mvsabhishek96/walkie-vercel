@@ -1,0 +1,25 @@
+body {
+  font-family: Arial;
+  padding: 20px;
+  text-align: center;
+}
+
+input, button {
+  padding: 12px;
+  margin: 8px;
+  font-size: 18px;
+}
+
+.ptt-container {
+  margin-top: 30px;
+}
+
+#pttBtn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  width: 150px;
+  height: 150px;
+  font-size: 20px;
+}
