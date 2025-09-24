@@ -1,28 +1,24 @@
-import { RtcTokenBuilder, RtcRole } from "agora-access-token";
+const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
 
 export default function handler(req, res) {
-  const { channel } = req.query;
+  const appID = "59595697a95d4d819dda18070b4f5ffe"; // Your Agora App ID
+  const appCertificate = "66ed800ef2f54df9bee2ac87badf2210"; // Your Primary Certificate
 
-  if (!channel) {
-    res.status(400).json({ error: "Channel name required" });
-    return;
-  }
-
-  const appID = "YOUR_AGORA_APP_ID";           // replace with your App ID
-  const appCertificate = "YOUR_AGORA_CERT";    // replace with your certificate
+  const channelName = req.query.channel || "default";
   const uid = Math.floor(Math.random() * 100000);
-  const expirationTimeInSeconds = 3600;
+  const role = RtcRole.PUBLISHER;
+  const expirationTimeInSeconds = 3600; // token valid for 1 hour
 
-  const currentTime = Math.floor(Date.now() / 1000);
-  const privilegeExpireTime = currentTime + expirationTimeInSeconds;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
 
   const token = RtcTokenBuilder.buildTokenWithUid(
     appID,
     appCertificate,
-    channel,
+    channelName,
     uid,
-    RtcRole.PUBLISHER,
-    privilegeExpireTime
+    role,
+    privilegeExpiredTs
   );
 
   res.status(200).json({ token, uid });
