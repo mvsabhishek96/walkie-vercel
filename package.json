@@ -1,12 +1,14 @@
 {
   "name": "walkie-vercel",
   "version": "1.0.0",
-  "description": "Agora walkie-talkie app deployed on Vercel",
+  "description": "Agora Walkie-Talkie App with Vercel serverless functions",
+  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "node api/generateToken.js"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
-    "agora-access-token": "^2.0.4"
+    "agora-access-token": "^2.0.4",
+    "express": "^4.19.2"
   }
 }

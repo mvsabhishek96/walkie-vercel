@@ -1,15 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Walkie Talkie</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Walkie - abhiwalkie</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Walkie Talkie</h1>
-  <button id="pttButton">Hold to Talk</button>
+  <main class="container">
+    <h1>abhiwalkie — Walkie Talkie</h1>
+    <div class="controls">
+      <button id="joinBtn">Join Channel</button>
+      <button id="leaveBtn" disabled>Leave Channel</button>
+    </div>
+    <div class="ptt-area">
+      <button id="pttBtn" aria-pressed="false" disabled>Hold to Talk</button>
+      <div id="status"></div>
+    </div>
+    <footer>
+      <small>Channel: <strong>walkiechannel</strong></small>
+    </footer>
+  </main>
 
+  <!-- Agora CDN (global AgoraRTC) -->
   <script src="https://cdn.agora.io/sdk/release/AgoraRTC_N.js"></script>
   <script src="script.js"></script>
 </body>

@@ -1,26 +1,63 @@
+/* public/style.css */
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #f7f7f9;
+  color: #111;
+  margin: 0;
+  padding: 24px;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 360px;
+  max-width: calc(100% - 32px);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   padding: 20px;
+  text-align: center;
 }
 
-input, button {
-  padding: 12px;
-  margin: 8px;
-  font-size: 18px;
-}
-
-.ptt-container {
-  margin-top: 30px;
-}
-
-#pttBtn {
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 150px;
-  height: 150px;
+h1 {
+  margin: 0 0 16px 0;
   font-size: 20px;
+}
+
+.controls { margin-bottom: 16px; }
+
+button {
+  font-size: 15px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
 }
+
+#joinBtn { background: #0b74de; color: white; margin-right: 8px; }
+#leaveBtn { background: #e0e0e0; color: #333; }
+
+.ptt-area { margin-top: 12px; display:flex; flex-direction: column; align-items:center; gap:8px; }
+
+#pttBtn {
+  background: #ff4d4d;
+  color: white;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+#pttBtn.talking {
+  background: #28a745;
+  transform: scale(0.98);
+}
+
+#status { font-size: 13px; color: #666; margin-top: 8px; }
+footer { margin-top: 12px; color:#888; font-size:12px; }

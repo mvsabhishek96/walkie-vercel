@@ -1,0 +1,9 @@
+{
+  "name": "Walkie-Talkie PWA",
+  "short_name": "Walkie",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff4d4d",
+  "icons": []
+}

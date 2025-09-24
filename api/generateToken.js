@@ -1,29 +1,40 @@
-import { RtcTokenBuilder, RtcRole } from "agora-access-token";
+// api/generateToken.js
+const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   const APP_ID = "59595697a95d4d819dda18070b4f5ffe";
   const APP_CERTIFICATE = "66ed800ef2f54df9bee2ac87badf2210";
 
   const channelName = "walkiechannel";
   const role = RtcRole.PUBLISHER;
 
-  // 24 hours in seconds
-  const expireTime = 24 * 3600;
+  // UID 0 means Agora will assign one
+  const uid = 0;
 
-  const uid = 0; // Let Agora assign UID automatically
+  // Current timestamp in seconds
+  const currentTime = Math.floor(Date.now() / 1000);
 
-  const token = RtcTokenBuilder.buildTokenWithUid(
-    APP_ID,
-    APP_CERTIFICATE,
-    channelName,
-    uid,
-    role,
-    expireTime
-  );
+  // Expire 24 hours from now
+  const privilegeExpireTs = currentTime + 24 * 3600; // 24 hours
 
-  res.status(200).json({
-    appId: APP_ID,
-    channel: channelName,
-    token
-  });
-}
+  try {
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      APP_ID,
+      APP_CERTIFICATE,
+      channelName,
+      uid,
+      role,
+      privilegeExpireTs
+    );
+
+    res.status(200).json({
+      appId: APP_ID,
+      channel: channelName,
+      token,
+      expiresAt: privilegeExpireTs
+    });
+  } catch (err) {
+    console.error("Error generating token:", err);
+    res.status(500).json({ error: "Failed to generate token" });
+  }
+};
