@@ -10,7 +10,7 @@ export default function handler(req, res) {
   // 24 hours in seconds
   const expireTime = 24 * 3600;
 
-  const uid = 0; // let Agora assign UID automatically
+  const uid = 0; // Let Agora assign UID automatically
 
   const token = RtcTokenBuilder.buildTokenWithUid(
     APP_ID,
